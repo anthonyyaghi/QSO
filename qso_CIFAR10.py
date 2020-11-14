@@ -36,7 +36,7 @@ class XGen:
         self.ema_filter = EmaFilter(sf)
 
     def compute(self, gz, pgz, xdata, pxdata):
-        x = self.ema_filter.filter((gz - pgz)/(xdata - pxdata))
+        x = self.ema_filter.filter((gz - pgz) / (xdata - pxdata))
         x = x.abs()
         x[torch.isnan(x)] = 0
         return torch.clamp(x, 0.01, 1)
@@ -107,14 +107,14 @@ transform = transforms.Compose(
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                        download=True, transform=transform)
+                                         download=True, transform=transform)
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=32,
-                                          shuffle=True, num_workers=2)
+                                           shuffle=True, num_workers=2)
 
 test_set = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                       download=True, transform=transform)
+                                        download=True, transform=transform)
 test_loader = torch.utils.data.DataLoader(test_set, batch_size=32,
-                                         shuffle=False, num_workers=2)
+                                          shuffle=False, num_workers=2)
 
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -132,7 +132,7 @@ def train(m_epoch):
         if batch_idx % log_interval == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 m_epoch, batch_idx * len(data), len(train_loader.dataset),
-                       100. * batch_idx / len(train_loader), loss.item()))
+                         100. * batch_idx / len(train_loader), loss.item()))
             train_losses.append(loss.item())
             train_counter.append((batch_idx * 4) + ((epoch - 1) * len(train_loader.dataset)))
 
@@ -150,7 +150,7 @@ def test():
             correct += pred.eq(target.data.view_as(pred)).sum()
     test_loss /= len(test_loader.dataset)
     test_losses.append(test_loss)
-    test_errors.append(100. * correct / len(test_loader.dataset))
+    test_acc.append(100. * correct / len(test_loader.dataset))
     print('\nTest set: Avg. loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
@@ -160,7 +160,7 @@ n_epochs = 10
 save_epochs = 5
 
 log_interval = 2500
-#random_seed = torch.randint(0, 100, (1, 1)).item()
+# random_seed = torch.randint(0, 100, (1, 1)).item()
 random_seed = 16
 torch.backends.cudnn.enabled = True
 torch.manual_seed(random_seed)
@@ -180,26 +180,25 @@ optimizer = optim.SGD(net.parameters(), lr=0.001)
 train_losses = []
 train_counter = []
 test_losses = []
-test_errors = []
+test_acc = []
 
 # load ?
-# net.load_state_dict(torch.load('nets/sgd_2'))
-# test_losses = torch.load('nets/test_losses_sgd_2')
-# test_errors = torch.load('nets/test_errors_sgd_2')
-# train_losses = torch.load('nets/train_losses_sgd_2')
-# train_counter = torch.load('nets/train_counter_sgd_2')
+# net.load_state_dict(torch.load('nets/sgd_10'))
+# test_losses = torch.load('nets/test_losses_sgd_10')
+# test_acc = torch.load('nets/test_acc_sgd_10')
+# train_losses = torch.load('nets/train_losses_sgd_10')
+# train_counter = torch.load('nets/train_counter_sgd_10')
 start_epoch = 1
 
 for epoch in range(start_epoch, n_epochs + 1):
     train(epoch)
     test()
-    if epoch%save_epochs == 0:
+    if epoch % save_epochs == 0:
         torch.save(net.state_dict(), f'nets/sgd_{epoch}')
         torch.save(test_losses, f'nets/test_losses_sgd_{epoch}')
-        torch.save(test_errors, f'nets/test_errors_sgd_{epoch}')
+        torch.save(test_acc, f'nets/test_acc_sgd_{epoch}')
         torch.save(train_losses, f'nets/train_losses_sgd_{epoch}')
         torch.save(train_counter, f'nets/train_counter_sgd_{epoch}')
-
 
 sgd_test_losses = test_losses
 
@@ -219,23 +218,23 @@ optimizer = QSOA(net.parameters(), lr=0.001)
 train_losses = []
 train_counter = []
 test_losses = []
-test_errors = []
+test_acc = []
 
 # load ?
-# net.load_state_dict(torch.load('nets/qso_40'))
-# test_losses = torch.load('nets/test_losses_qso_40')
-# test_errors = torch.load('nets/test_errors_qso_40')
-# train_losses = torch.load('nets/train_losses_qso_40')
-# train_counter = torch.load('nets/train_counter_qso_40')
+# net.load_state_dict(torch.load('nets/qso_10'))
+# test_losses = torch.load('nets/test_losses_qso_10')
+# test_acc = torch.load('nets/test_acc_qso_10')
+# train_losses = torch.load('nets/train_losses_qso_10')
+# train_counter = torch.load('nets/train_counter_qso_10')
 start_epoch = 1
 
 for epoch in range(start_epoch, n_epochs + 1):
     train(epoch)
     test()
-    if epoch%save_epochs == 0:
+    if epoch % save_epochs == 0:
         torch.save(net.state_dict(), f'nets/qso_{epoch}')
         torch.save(test_losses, f'nets/test_losses_qso_{epoch}')
-        torch.save(test_errors, f'nets/test_errors_qso_{epoch}')
+        torch.save(test_acc, f'nets/test_acc_qso_{epoch}')
         torch.save(train_losses, f'nets/train_losses_qso_{epoch}')
         torch.save(train_counter, f'nets/train_counter_qso_{epoch}')
 
@@ -257,17 +256,28 @@ qso_train_losses = torch.load('nets/train_losses_qso_10')
 sgd_train_counter = torch.load('nets/train_counter_sgd_10')
 qso_train_counter = torch.load('nets/train_counter_qso_10')
 
-
 # Load test errors
-sgd_test_errors = torch.load('nets/test_errors_sgd_10')
-qso_test_errors = torch.load('nets/test_errors_qso_10')
+sgd_test_acc = torch.load('nets/test_acc_sgd_10')
+qso_test_acc = torch.load('nets/test_acc_qso_10')
 
 current_epoch = 10
 
-test_counter = [i * len(train_loader.dataset) for i in range(1, current_epoch+1)]
+test_counter = [i * len(train_loader.dataset) for i in range(1, current_epoch + 1)]
 train_counter = []
 fig = plt.figure()
 plt.plot(test_counter, sgd_test_losses, color='red')
 plt.plot(sgd_train_counter, sgd_train_losses, color='blue')
 plt.legend(['Test Loss', 'Train Loss'], loc='upper right')
+fig.savefig('sgd_losses.png')
 
+fig = plt.figure()
+plt.plot(test_counter, qso_test_losses, color='red')
+plt.plot(sgd_train_counter, qso_train_losses, color='blue')
+plt.legend(['Test Loss', 'Train Loss'], loc='upper right')
+fig.savefig('qso_losses.png')
+
+fig = plt.figure()
+plt.plot(test_counter, sgd_test_acc, color='red')
+plt.plot(test_counter, qso_test_acc, color='blue')
+plt.legend(['SGD', 'QSO'], loc='upper right')
+fig.savefig('test_acc.png')
