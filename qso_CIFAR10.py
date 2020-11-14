@@ -161,7 +161,7 @@ def test():
 n_epochs = 10
 save_epochs = 5
 
-log_interval = math.ceil(50000/batch_size/35)
+log_interval = math.ceil(50000/batch_size/5)
 # random_seed = torch.randint(0, 100, (1, 1)).item()
 random_seed = 16
 torch.backends.cudnn.enabled = True
