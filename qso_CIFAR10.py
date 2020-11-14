@@ -108,12 +108,12 @@ transform = transforms.Compose(
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True,
                                         download=True, transform=transform)
-train_loader = torch.utils.data.DataLoader(train_set, batch_size=4,
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=32,
                                           shuffle=True, num_workers=2)
 
 test_set = torchvision.datasets.CIFAR10(root='./data', train=False,
                                        download=True, transform=transform)
-test_loader = torch.utils.data.DataLoader(test_set, batch_size=4,
+test_loader = torch.utils.data.DataLoader(test_set, batch_size=32,
                                          shuffle=False, num_workers=2)
 
 classes = ('plane', 'car', 'bird', 'cat',
@@ -156,7 +156,7 @@ def test():
         100. * correct / len(test_loader.dataset)))
 
 
-n_epochs = 200
+n_epochs = 10
 save_epochs = 5
 
 log_interval = 2500
